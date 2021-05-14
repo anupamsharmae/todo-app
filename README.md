@@ -1,5 +1,5 @@
 # ToDo-App ✅
-toDo Application is a basic appliction to save your task that has to be done.
+toDo Application is a basic application to save your task that has to be done.
 
 ### Project 👨🏻‍💻
 - Basic Application
