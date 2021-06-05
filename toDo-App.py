@@ -7,7 +7,6 @@
 # -------------------------------By: Anupam Sharma
 # ################################################
 
-
 # Importing modules required in this project
 # using --- PyQt6 ---
 import sys
@@ -19,23 +18,25 @@ from PyQt6.QtGui import QIcon, QCursor
 
 
 # --------Thread class---------------#
-class WorkerThread(QThread): 
+class WorkerThread(QThread):
     status = pyqtSignal(str)
+
     def run(self):
         time.sleep(2)
-        print('time')
+        self.status.emit('...')
+        print('...')
 
 
 class todo(QWidget):
     def __init__(self):
-        super().__init__()   
-    
-        # adding logo of the window 
+        super().__init__()
+
+        # adding logo of the window
         self.setWindowIcon(QIcon('icons/icon.png'))
 
         # setting the title of the window
         self.setWindowTitle('ToDo List')
-        
+
         # fixed size window
         self.setFixedSize(350, 480)
 
@@ -52,7 +53,6 @@ class todo(QWidget):
         self.toast = QLabel('...')
         #self.toast.setAlignment(Qt.Alignment.AlignCenter)
         self.toast.setObjectName('toast')
-        
 
         # listwidget
         self.list = QListWidget()
@@ -62,9 +62,7 @@ class todo(QWidget):
         # setting selection mode property
         self.list.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.list.itemClicked.connect(self.item)
-        
-        
-        
+
         # Textbox widget
         self.textbox = QLineEdit(self)
         self.textbox.setPlaceholderText('Take a note!')
@@ -77,10 +75,9 @@ class todo(QWidget):
         #self.btn_addTask.setIcon(QIcon('icons/plus.png'))
         btn_addTask.setObjectName('addButton')
         btn_addTask.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        
 
         # Delete button widget
-        btn_deleteTask =QPushButton()
+        btn_deleteTask = QPushButton()
         btn_deleteTask.clicked.connect(self.deleteT)
         btn_deleteTask.setIcon(QIcon('icons/trash-regular.png'))
         btn_deleteTask.setIconSize(QSize(20, 20))
@@ -92,7 +89,7 @@ class todo(QWidget):
         btn_saveTask = QPushButton()
         btn_saveTask.clicked.connect(self.saveT)
         btn_saveTask.setIcon(QIcon('icons/save-regular.png'))
-        btn_saveTask.setIconSize(QSize(20, 20)) 
+        btn_saveTask.setIconSize(QSize(20, 20))
         btn_saveTask.setToolTip('Save Your List')
         btn_saveTask.setObjectName('saveButton')
         btn_saveTask.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -105,7 +102,7 @@ class todo(QWidget):
         btn_loadTask.setToolTip('Load previously saved List')
         btn_loadTask.setObjectName('loadButton')
         btn_loadTask.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        
+
         # ClearAll button widget
         btn_clearAll = QPushButton('Clear All')
         btn_clearAll.clicked.connect(self.clearAllTask)
@@ -115,7 +112,7 @@ class todo(QWidget):
         # setting Layouts
         verticalLayout.addWidget(label)
         horizontalLayout.addWidget(status)
-        horizontalLayout.addWidget(self.toast,1)
+        horizontalLayout.addWidget(self.toast, 1)
         horizontalLayout.addWidget(btn_loadTask)
         horizontalLayout.addWidget(btn_saveTask)
         horizontalLayout.addWidget(btn_deleteTask)
@@ -126,23 +123,32 @@ class todo(QWidget):
         horizontalLayoutforbutton.addWidget(btn_addTask)
         verticalLayout.addLayout(horizontalLayoutforbutton)
         self.setLayout(verticalLayout)
-    
+
+
 
     # Set Toast when item is selected from the list
     def item(self):
-        self.toast.setText('Item Selected')
-    
+        if self.list.selectedItems():
+            self.toast.setText('Item Selected')
+        else:
+            self.toast.setText('...')
+
+
+
 
     # Event handling method when any key is pressed
     def keyPressEvent(self, event):
-        print(event.key())
+        #print(event.key())
         self.textbox.setFocus()
+
         # when user press enter, it automatically add func() to add task in the list
         if event.key() == 16777220 or event.key() == 16777221:
             self.addTask()
 
 
-    # clear listwidget and linedit  
+
+
+    # clear listwidget and linedit
     def clearAllTask(self):
         self.list.clear()
         self.textbox.clear()
@@ -150,11 +156,12 @@ class todo(QWidget):
         self.ThreadClass()
 
 
-    # Adding listItem into the listwidget  
+
+    # Adding listItem into the listwidget
     def addTask(self):
         task = self.textbox.text()
-        print(len(task))
-        if task!="":
+        #print(len(task))
+        if task != "":
             self.list.addItem(task)
             self.textbox.clear()
             self.toast.setText('Item Added')
@@ -163,9 +170,11 @@ class todo(QWidget):
             self.toast.setText('Add Item first')
             self.toast.setStyleSheet('''color:   #d9534f; ''')
             self.ThreadClass()
-   
 
-    # Delete the selected listItem 
+
+
+
+    # Delete the selected listItem
     def deleteT(self):
         if(self.list.selectedItems()):
             for i in self.list.selectedItems():
@@ -180,69 +189,82 @@ class todo(QWidget):
             self.ThreadClass()
 
 
+
+
     # Save the selected listItem
     def saveT(self):
         if(self.list.selectedItems()):
-            with open('load.txt','a+') as file:
-            # getting the current time
-                currentTime = time.asctime( time.localtime(time.time()) )
+            with open('load.txt', 'a+') as file:
+
+                # getting the current time
+                current_time = time.asctime(time.localtime(time.time()))
                 print(self.list.count())
                 for i in reversed(self.list.selectedItems()):
-                    timeStamp = '\n------------ {}'.format(currentTime)
+                    timestamp = '\n------------ {}'.format(current_time)
                     task_index = self.list.row(i)
                     strr = self.list.item(task_index).text()
-                    print(strr)
+                    
                     # concatinate time after the list item
-                    strr = strr[0:] + timeStamp
+                    strr = strr[0:] + timestamp
+
                     # replacing '\n' (new line) with symbol '$$' in the list item
-                    strr = strr.replace('\n','$$')
-                    print(strr)
-                    file.write(strr)
-                    file.write('\n')
+                    strr = strr.replace('\n', '$$')
+                    file.write(strr + '\n')
+                
             self.toast.setText('Task saved')
             self.ThreadClass()
+
         else:
             self.toast.setText('Select! item')
             self.toast.setStyleSheet('''color:  #d9534f;''')
             self.ThreadClass()
-    
+
+
+
 
     # Load the Saved task from the file named: load.txt
     def loadTask(self):
         try:
-            # check the file size 
+            # check the file size or file not exist throws an exception
             if os.stat('load.txt').st_size != 0:
                 self.list.clear()
+
                 # reading the item one by one
-                with open('load.txt','r') as file: 
+                with open('load.txt', 'r') as file:
                     for i in file.readlines():
+
                         # replacing '$$' with '\n' in the list item
                         i = i.replace('$$', '\n')
-                        print(i)
+
                         self.list.addItem(i)
+
                 self.toast.setText('Task Loaded')
                 self.ThreadClass()
             else:
                 self.toast.setText('Task List empty!')
                 self.toast.setStyleSheet('''color: #d9534f;''')
                 self.ThreadClass()
+
         except:
-            file = open('load.txt','a+')
+            file = open('load.txt', 'a+')
             print('file created !')
-            self.loadTask() 
-       
+            self.loadTask()
+
+
 
     # Default Toast Message
-    def toast_msg(self):
-        self.toast.setText('...')
+    def toast_msg(self, msg):
+        self.toast.setText(msg)
         self.toast.setStyleSheet('''color: #1a73e8;''')
 
-    
+
+
     # Thread function calling
     def ThreadClass(self):
         self.worker = WorkerThread()
         self.worker.start()
-        self.worker.finished.connect(self.toast_msg)
+        self.worker.status.connect(self.toast_msg)
+
 
 
 
@@ -250,12 +272,13 @@ class todo(QWidget):
 app = QApplication(sys.argv)
 app.setStyleSheet('''
     *{
-        background-color:       #ffffff;
+        background-color:        #ffffff;
         font-family:            Century Gothic;
     }
     
     #header{
        font-size:               30px; 
+       /*font-family:             Mistral;*/
        color:                   #787c80;
        margin:                  0px  5px;
     }
